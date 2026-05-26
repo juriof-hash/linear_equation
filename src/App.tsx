@@ -203,15 +203,15 @@ export default function App() {
             </div>
 
             {/* Print Friendly Output */}
-            <div className="hidden print:block space-y-16">
+            <div className="hidden print:block space-y-0">
               {Array.from({ length: totalPages }).map((_, i) => {
                 const pageNum = i + 1;
                 const pageStart = (pageNum - 1) * PROBLEMS_PER_PAGE;
                 const pageProblems = problems.slice(pageStart, pageStart + PROBLEMS_PER_PAGE);
                 
                 return (
-                  <div key={`print-page-${pageNum}`} className={`print-page-break`}>
-                    <div className="text-center mb-8 border-b-2 border-slate-800 pb-4">
+                  <div key={`print-page-${pageNum}`} className={`print-page-break h-screen flex flex-col pt-8 pb-8 px-8 box-border`}>
+                    <div className="text-center mb-6 border-b-2 border-slate-800 pb-4 shrink-0">
                       <h2 className="text-3xl font-heading font-bold text-slate-800">일차방정식 연습장</h2>
                       <div className="flex justify-between mt-4 font-bold text-lg text-slate-600">
                         <span>학년/반: __________________</span>
@@ -219,13 +219,17 @@ export default function App() {
                         <span>( {pageNum} / {totalPages} )쪽</span>
                       </div>
                     </div>
-                    <Worksheet 
-                      problems={pageProblems} 
-                      startNumber={startNum + pageStart} 
-                      fontSizeClass={FONT_SIZES[fontSizeIndex].problem}
-                    />
+                    
+                    <div className="flex-grow min-h-0">
+                      <Worksheet 
+                        problems={pageProblems} 
+                        startNumber={startNum + pageStart} 
+                        fontSizeClass={FONT_SIZES[fontSizeIndex].problem}
+                      />
+                    </div>
+
                     {showAnswers && (
-                      <div className="mt-12 pt-8 border-t-2 border-dashed border-slate-400">
+                      <div className="shrink-0 mt-6 pt-4 border-t-2 border-dashed border-slate-400">
                          <AnswerKey 
                            problems={pageProblems} 
                            startNumber={startNum + pageStart} 

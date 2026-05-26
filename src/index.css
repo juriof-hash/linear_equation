@@ -46,10 +46,11 @@ h1, h2, h3, h4, h5, h6 {
     display: none !important;
   }
   @page {
-    margin: 1cm;
+    margin: 0;
   }
   .print-page-break {
-    page-break-before: always;
+    page-break-after: always;
+    page-break-inside: avoid;
   }
   .print-avoid-break {
     page-break-inside: avoid;
