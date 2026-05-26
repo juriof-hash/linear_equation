@@ -7,12 +7,9 @@ import { Printer, RefreshCcw, Eye, EyeOff, Settings, Minus, Plus, Loader2 } from
 const PROBLEMS_PER_PAGE = 6;
 
 const FONT_SIZES = [
+  { label: '10pt', problem: 'text-[10pt]', answer: 'text-[8pt]' },
   { label: '12pt', problem: 'text-[12pt]', answer: 'text-[10pt]' },
-  { label: '14pt', problem: 'text-[14pt]', answer: 'text-[11pt]' },
-  { label: '16pt', problem: 'text-[16pt]', answer: 'text-[12pt]' },
-  { label: '18pt', problem: 'text-[18pt]', answer: 'text-[13pt]' },
-  { label: '20pt', problem: 'text-[20pt]', answer: 'text-[14pt]' },
-  { label: '24pt', problem: 'text-[24pt]', answer: 'text-[16pt]' }
+  { label: '14pt', problem: 'text-[14pt]', answer: 'text-[12pt]' }
 ];
 
 export default function App() {
@@ -29,7 +26,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(true);
   const [showAnswers, setShowAnswers] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [fontSizeIndex, setFontSizeIndex] = useState(2);
+  const [fontSizeIndex, setFontSizeIndex] = useState(1);
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateProgress, setGenerateProgress] = useState({ current: 0, total: 0, estimatedTimeMs: 0 });
