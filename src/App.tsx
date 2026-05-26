@@ -7,10 +7,12 @@ import { Printer, RefreshCcw, Eye, EyeOff, Settings, Minus, Plus, Loader2 } from
 const PROBLEMS_PER_PAGE = 6;
 
 const FONT_SIZES = [
-  { label: '작게', problem: 'text-xl', answer: 'text-base' },
-  { label: '보통', problem: 'text-2xl', answer: 'text-lg' },
-  { label: '크게', problem: 'text-3xl', answer: 'text-xl' },
-  { label: '아주 크게', problem: 'text-4xl', answer: 'text-2xl' }
+  { label: '12pt', problem: 'text-[12pt]', answer: 'text-[10pt]' },
+  { label: '14pt', problem: 'text-[14pt]', answer: 'text-[11pt]' },
+  { label: '16pt', problem: 'text-[16pt]', answer: 'text-[12pt]' },
+  { label: '18pt', problem: 'text-[18pt]', answer: 'text-[13pt]' },
+  { label: '20pt', problem: 'text-[20pt]', answer: 'text-[14pt]' },
+  { label: '24pt', problem: 'text-[24pt]', answer: 'text-[16pt]' }
 ];
 
 export default function App() {
@@ -27,7 +29,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(true);
   const [showAnswers, setShowAnswers] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [fontSizeIndex, setFontSizeIndex] = useState(1);
+  const [fontSizeIndex, setFontSizeIndex] = useState(2);
   
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateProgress, setGenerateProgress] = useState({ current: 0, total: 0, estimatedTimeMs: 0 });
