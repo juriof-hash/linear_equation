@@ -1,0 +1,248 @@
+import { useState, useEffect } from 'react';
+import { Problem, ProblemType, problemGenerators } from './lib/math';
+import { Worksheet } from './components/Worksheet';
+import { AnswerKey } from './components/AnswerKey';
+import { Printer, RefreshCcw, Eye, EyeOff, Settings } from 'lucide-react';
+
+const PROBLEMS_PER_PAGE = 6;
+
+export default function App() {
+  const [problems, setProblems] = useState<Problem[]>([]);
+  const [types, setTypes] = useState<Record<ProblemType, boolean>>({
+    integer: true,
+    parentheses: false,
+    fractionCoeff: false,
+    fractionTerm: false,
+  });
+  
+  const [startNum, setStartNum] = useState<number>(1);
+  const [endNum, setEndNum] = useState<number>(12);
+  const [showSettings, setShowSettings] = useState(true);
+  const [showAnswers, setShowAnswers] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(problems.length / PROBLEMS_PER_PAGE);
+  const currentPageProblems = problems.slice(
+    (currentPage - 1) * PROBLEMS_PER_PAGE,
+    currentPage * PROBLEMS_PER_PAGE
+  );
+
+  const handleGenerate = () => {
+    if (startNum > endNum) {
+      alert('시작 번호는 끝 번호보다 작거나 같아야 해요!');
+      return;
+    }
+    const selectedTypes = Object.entries(types)
+      .filter(([_, isSelected]) => isSelected)
+      .map(([type]) => type as ProblemType);
+      
+    if (selectedTypes.length === 0) {
+      alert('어떤 문제를 풀지 선택해주세요!');
+      return;
+    }
+    
+    const count = endNum - startNum + 1;
+    const newProblems: Problem[] = [];
+    
+    for (let i = 0; i < count; i++) {
+      const type = selectedTypes[Math.floor(Math.random() * selectedTypes.length)];
+      newProblems.push(problemGenerators[type]());
+    }
+    
+    setProblems(newProblems);
+    setCurrentPage(1);
+    setShowAnswers(false);
+    setShowSettings(false);
+  };
+  
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const toggleType = (type: ProblemType) => {
+    setTypes(prev => ({ ...prev, [type]: !prev[type] }));
+  };
+
+  return (
+    <div className="min-h-screen pb-20">
+      {/* Header */}
+      <header className="bg-brand-500 text-white p-6 shadow-md mb-8 no-print">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3 text-3xl font-heading font-bold">
+            <span>🧮</span>
+            <h1>일차방정식 마스터</h1>
+          </div>
+          {problems.length > 0 && !showSettings && (
+            <button 
+              onClick={() => setShowSettings(true)}
+              className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 px-4 py-2 rounded-full font-bold transition-colors"
+            >
+              <Settings size={20} />
+              새로운 문제 만들기
+            </button>
+          )}
+        </div>
+      </header>
+      
+      <main className="max-w-4xl mx-auto px-4 w-full">
+        {/* Settings Panel */}
+        {showSettings && (
+          <div className="bg-white rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border-t-8 border-brand-500 mb-12 no-print transform transition-all">
+             <h2 className="text-2xl font-heading text-slate-800 mb-6 flex items-center gap-2">
+               <span>🎯</span> 어떤 문제를 풀어볼까요?
+             </h2>
+             
+             <div className="grid md:grid-cols-2 gap-8 mb-8">
+               <div className="bg-brand-50 p-6 rounded-2xl">
+                 <h3 className="font-bold text-lg text-slate-700 mb-4">문제 유형</h3>
+                 <div className="space-y-3">
+                   <label className="flex items-center gap-3 p-2 rounded-xl hover:bg-white transition-colors cursor-pointer">
+                     <input type="checkbox" className="w-5 h-5 accent-brand-500" 
+                       checked={types.integer} onChange={() => toggleType('integer')} />
+                     <span className="text-slate-700 font-medium">기본 정수 (가장 쉬워요!)</span>
+                   </label>
+                   <label className="flex items-center gap-3 p-2 rounded-xl hover:bg-white transition-colors cursor-pointer">
+                     <input type="checkbox" className="w-5 h-5 accent-brand-500" 
+                       checked={types.parentheses} onChange={() => toggleType('parentheses')} />
+                     <span className="text-slate-700 font-medium">괄호가 있는 문제</span>
+                   </label>
+                   <label className="flex items-center gap-3 p-2 rounded-xl hover:bg-white transition-colors cursor-pointer">
+                     <input type="checkbox" className="w-5 h-5 accent-brand-500" 
+                       checked={types.fractionCoeff} onChange={() => toggleType('fractionCoeff')} />
+                     <span className="text-slate-700 font-medium">분수가 있는 문제 (조금 어려워요)</span>
+                   </label>
+                   <label className="flex items-center gap-3 p-2 rounded-xl hover:bg-white transition-colors cursor-pointer">
+                     <input type="checkbox" className="w-5 h-5 accent-brand-500" 
+                       checked={types.fractionTerm} onChange={() => toggleType('fractionTerm')} />
+                     <span className="text-slate-700 font-medium">복잡한 분수 형태 (도전!)</span>
+                   </label>
+                 </div>
+               </div>
+               
+               <div className="bg-accent-50 p-6 rounded-2xl flex flex-col justify-center">
+                 <h3 className="font-bold text-lg text-slate-700 mb-4">문제 개수</h3>
+                 <div className="flex items-center justify-center gap-4 text-xl">
+                   <input type="number" value={startNum} min="1" onChange={e => setStartNum(parseInt(e.target.value) || 1)}
+                     className="w-20 text-center py-2 px-3 rounded-xl border-2 border-slate-200 focus:border-accent-500 font-bold" />
+                   <span className="text-slate-500">부터</span>
+                   <input type="number" value={endNum} min="1" onChange={e => setEndNum(parseInt(e.target.value) || 1)}
+                     className="w-20 text-center py-2 px-3 rounded-xl border-2 border-slate-200 focus:border-accent-500 font-bold" />
+                   <span className="text-slate-500">까지</span>
+                 </div>
+                 <p className="text-center text-sm text-slate-500 mt-4">
+                   총 {Math.max(0, endNum - startNum + 1)}문제가 만들어져요!
+                 </p>
+               </div>
+             </div>
+             
+             <div className="flex justify-center">
+               <button 
+                 onClick={handleGenerate}
+                 className="flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white text-xl font-heading font-bold px-10 py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
+               >
+                 <RefreshCcw className="animate-spin-slow" />
+                 재미있는 문제 만들기 시작!
+               </button>
+             </div>
+          </div>
+        )}
+
+        {/* Content Area */}
+        {problems.length > 0 && !showSettings && (
+          <div className="animate-fade-in">
+            {/* Action Bar */}
+            <div className="flex flex-wrap justify-center gap-4 mb-8 no-print">
+              <button 
+                onClick={() => setShowAnswers(!showAnswers)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all shadow-md ${
+                  showAnswers 
+                    ? 'bg-success-100 text-success-700 hover:bg-success-200' 
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                {showAnswers ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showAnswers ? '정답 숨기기' : '정답 보기'}
+              </button>
+              
+              <button 
+                onClick={handlePrint}
+                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-md"
+              >
+                <Printer size={20} />
+                종이로 인쇄하기
+              </button>
+            </div>
+
+            {/* Print Friendly Output */}
+            <div className="hidden print:block space-y-16">
+              {Array.from({ length: totalPages }).map((_, i) => {
+                const pageNum = i + 1;
+                const pageStart = (pageNum - 1) * PROBLEMS_PER_PAGE;
+                const pageProblems = problems.slice(pageStart, pageStart + PROBLEMS_PER_PAGE);
+                
+                return (
+                  <div key={`print-page-${pageNum}`} className={`print-page-break`}>
+                    <div className="text-center mb-8 border-b-2 border-slate-800 pb-4">
+                      <h2 className="text-3xl font-heading font-bold text-slate-800">일차방정식 연습장</h2>
+                      <div className="flex justify-between mt-4 font-bold text-lg text-slate-600">
+                        <span>학년/반: __________________</span>
+                        <span>이름: __________________</span>
+                        <span>( {pageNum} / {totalPages} )쪽</span>
+                      </div>
+                    </div>
+                    <Worksheet problems={pageProblems} startNumber={startNum + pageStart} />
+                    {showAnswers && (
+                      <div className="mt-12 pt-8 border-t-2 border-dashed border-slate-400">
+                         <AnswerKey problems={pageProblems} startNumber={startNum + pageStart} />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Interactive Screen Output */}
+            <div className="print:hidden space-y-8">
+               <div className="text-center">
+                 <h2 className="text-3xl font-heading font-bold text-brand-600 mb-2">풀어보자! 아자아자! 🚀</h2>
+                 <p className="text-slate-500 font-bold mb-6">
+                   {currentPage}쪽 (전체 {totalPages}쪽)
+                 </p>
+               </div>
+               
+               <Worksheet problems={currentPageProblems} startNumber={startNum + (currentPage - 1) * PROBLEMS_PER_PAGE} />
+               
+               {showAnswers && (
+                 <div className="mt-4 animate-fade-in">
+                   <AnswerKey problems={currentPageProblems} startNumber={startNum + (currentPage - 1) * PROBLEMS_PER_PAGE} />
+                 </div>
+               )}
+
+               <div className="flex justify-center items-center gap-6 mt-12 bg-white inline-flex p-2 rounded-full shadow-lg mx-auto w-max max-w-full">
+                 <button 
+                   disabled={currentPage === 1}
+                   onClick={() => setCurrentPage(c => Math.max(1, c - 1))}
+                   className="px-6 py-3 rounded-full font-bold bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-slate-700"
+                 >
+                   &lt; 이전
+                 </button>
+                 <span className="font-heading text-lg font-bold text-brand-600">
+                   {currentPage} / {totalPages}
+                 </span>
+                 <button 
+                   disabled={currentPage === totalPages}
+                   onClick={() => setCurrentPage(c => Math.min(totalPages, c + 1))}
+                   className="px-6 py-3 rounded-full font-bold bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-slate-700"
+                 >
+                   다음 &gt;
+                 </button>
+               </div>
+            </div>
+            
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+

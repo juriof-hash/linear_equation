@@ -1,0 +1,6 @@
+{
+  "name": "일차방정식 마스터",
+  "description": "초등학생들을 위한 귀엽고 친근한 일차방정식 문제 생성기입니다. 다양한 난이도의 문제를 생성하고, 화면에서 풀거나 인쇄할 수 있습니다.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
