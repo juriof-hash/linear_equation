@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Problem, ProblemType, problemGenerators } from './lib/math';
 import { Worksheet } from './components/Worksheet';
 import { AnswerKey } from './components/AnswerKey';
-import { Printer, RefreshCcw, Eye, EyeOff, Settings, Minus, Plus } from 'lucide-react';
+import { Printer, RefreshCcw, Eye, EyeOff, Settings, Minus, Plus, Loader2 } from 'lucide-react';
 
 const PROBLEMS_PER_PAGE = 6;
 
@@ -28,6 +28,9 @@ export default function App() {
   const [showAnswers, setShowAnswers] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [fontSizeIndex, setFontSizeIndex] = useState(1);
+  
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generateProgress, setGenerateProgress] = useState({ current: 0, total: 0, estimatedTimeMs: 0 });
 
   const totalPages = Math.ceil(problems.length / PROBLEMS_PER_PAGE);
   const currentPageProblems = problems.slice(
@@ -35,7 +38,7 @@ export default function App() {
     currentPage * PROBLEMS_PER_PAGE
   );
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (startNum > endNum) {
       alert('시작 번호는 끝 번호보다 작거나 같아야 해요!');
       return;
@@ -50,17 +53,46 @@ export default function App() {
     }
     
     const count = endNum - startNum + 1;
-    const newProblems: Problem[] = [];
     
-    for (let i = 0; i < count; i++) {
-      const type = selectedTypes[Math.floor(Math.random() * selectedTypes.length)];
-      newProblems.push(problemGenerators[type]());
+    setIsGenerating(true);
+    setGenerateProgress({ current: 0, total: count, estimatedTimeMs: 0 });
+
+    const newProblems: Problem[] = [];
+    const chunkSize = 2; 
+    let generatedCount = 0;
+    const startTime = performance.now();
+    
+    const generateChunk = () => {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          for (let i = 0; i < chunkSize && generatedCount < count; i++) {
+            const type = selectedTypes[Math.floor(Math.random() * selectedTypes.length)];
+            newProblems.push(problemGenerators[type]());
+            generatedCount++;
+          }
+          const elapsed = performance.now() - startTime;
+          const estimatedTotal = (elapsed / generatedCount) * count;
+          const remaining = estimatedTotal - elapsed;
+          
+          setGenerateProgress({ 
+            current: generatedCount, 
+            total: count, 
+            estimatedTimeMs: Math.max(0, remaining) 
+          });
+          resolve();
+        }, 15);
+      });
+    };
+
+    while (generatedCount < count) {
+      await generateChunk();
     }
     
     setProblems(newProblems);
     setCurrentPage(1);
     setShowAnswers(false);
     setShowSettings(false);
+    setIsGenerating(false);
   };
   
   const handlePrint = () => {
@@ -143,14 +175,36 @@ export default function App() {
                </div>
              </div>
              
-             <div className="flex justify-center">
-               <button 
-                 onClick={handleGenerate}
-                 className="flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white text-xl font-heading font-bold px-10 py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all"
-               >
-                 <RefreshCcw className="animate-spin-slow" />
-                 재미있는 문제 만들기 시작!
-               </button>
+             <div className="flex justify-center h-[72px] items-center">
+               {isGenerating ? (
+                 <div className="flex flex-col items-center w-full max-w-md mx-auto animate-fade-in">
+                   <div className="w-full bg-slate-200 rounded-full h-4 mb-2 overflow-hidden shadow-inner">
+                     <div 
+                       className="bg-accent-500 h-4 rounded-full transition-all duration-200 ease-out flex items-center justify-end pr-1" 
+                       style={{ width: `${Math.max(5, (generateProgress.current / generateProgress.total) * 100)}%` }}
+                     >
+                       <div className="w-2 h-2 bg-white rounded-full bg-opacity-50 animate-pulse"></div>
+                     </div>
+                   </div>
+                   <div className="flex justify-between w-full font-bold text-sm">
+                     <span className="text-slate-600 flex items-center gap-2">
+                       <Loader2 size={14} className="animate-spin" />
+                       문제 생성 중... {generateProgress.current} / {generateProgress.total}
+                     </span>
+                     <span className="text-accent-600">
+                       예상 남은 시간: {Math.max(0, Math.ceil(generateProgress.estimatedTimeMs / 1000))}초
+                     </span>
+                   </div>
+                 </div>
+               ) : (
+                 <button 
+                   onClick={handleGenerate}
+                   className="flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white text-xl font-heading font-bold px-10 py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all focus:outline-none focus:ring-4 focus:ring-accent-300"
+                 >
+                   <RefreshCcw className="animate-spin-slow" />
+                   재미있는 문제 만들기 시작!
+                 </button>
+               )}
              </div>
           </div>
         )}
