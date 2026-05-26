@@ -11,7 +11,7 @@ interface AnswerKeyProps {
 export function AnswerKey({ problems, startNumber, fontSizeClass = 'text-lg' }: AnswerKeyProps) {
   return (
     <div className="w-full max-w-4xl mx-auto mt-6 p-4 bg-success-50 rounded-xl border-2 border-success-200 print:bg-transparent print:border-none print:p-0 print:mt-2 print-avoid-break">
-      <div className={`flex flex-wrap justify-center print:justify-start gap-x-6 gap-y-3 text-slate-700 ${fontSizeClass}`}>
+      <div className={`grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 print:grid-cols-6 gap-x-4 gap-y-4 text-slate-700 ${fontSizeClass}`}>
         {problems.map((prob, index) => {
           const ansString = `${formatFraction(prob.answer.num, prob.answer.den)}`;
           return (
