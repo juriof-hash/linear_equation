@@ -2,9 +2,16 @@ import { useState, useEffect } from 'react';
 import { Problem, ProblemType, problemGenerators } from './lib/math';
 import { Worksheet } from './components/Worksheet';
 import { AnswerKey } from './components/AnswerKey';
-import { Printer, RefreshCcw, Eye, EyeOff, Settings } from 'lucide-react';
+import { Printer, RefreshCcw, Eye, EyeOff, Settings, Minus, Plus } from 'lucide-react';
 
 const PROBLEMS_PER_PAGE = 6;
+
+const FONT_SIZES = [
+  { label: '작게', problem: 'text-xl', answer: 'text-base' },
+  { label: '보통', problem: 'text-2xl', answer: 'text-lg' },
+  { label: '크게', problem: 'text-3xl', answer: 'text-xl' },
+  { label: '아주 크게', problem: 'text-4xl', answer: 'text-2xl' }
+];
 
 export default function App() {
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -20,6 +27,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(true);
   const [showAnswers, setShowAnswers] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [fontSizeIndex, setFontSizeIndex] = useState(1);
 
   const totalPages = Math.ceil(problems.length / PROBLEMS_PER_PAGE);
   const currentPageProblems = problems.slice(
@@ -151,7 +159,28 @@ export default function App() {
         {problems.length > 0 && !showSettings && (
           <div className="animate-fade-in">
             {/* Action Bar */}
-            <div className="flex flex-wrap justify-center gap-4 mb-8 no-print">
+            <div className="flex flex-wrap justify-center items-center gap-4 mb-8 no-print">
+              <div className="flex items-center gap-2 bg-white px-4 py-2 flex-shrink-0 rounded-2xl shadow-md border-2 border-slate-100">
+                <span className="text-slate-500 font-bold mr-1 hidden sm:inline">글씨 크기</span>
+                <button 
+                  onClick={() => setFontSizeIndex(i => Math.max(0, i - 1))}
+                  disabled={fontSizeIndex === 0}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 disabled:opacity-50 transition-colors"
+                >
+                  <Minus size={16} />
+                </button>
+                <span className="font-bold text-slate-700 w-20 text-center">
+                  {FONT_SIZES[fontSizeIndex].label}
+                </span>
+                <button 
+                  onClick={() => setFontSizeIndex(i => Math.min(FONT_SIZES.length - 1, i + 1))}
+                  disabled={fontSizeIndex === FONT_SIZES.length - 1}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 hover:bg-slate-200 disabled:opacity-50 transition-colors"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+
               <button 
                 onClick={() => setShowAnswers(!showAnswers)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all shadow-md ${
@@ -190,10 +219,18 @@ export default function App() {
                         <span>( {pageNum} / {totalPages} )쪽</span>
                       </div>
                     </div>
-                    <Worksheet problems={pageProblems} startNumber={startNum + pageStart} />
+                    <Worksheet 
+                      problems={pageProblems} 
+                      startNumber={startNum + pageStart} 
+                      fontSizeClass={FONT_SIZES[fontSizeIndex].problem}
+                    />
                     {showAnswers && (
                       <div className="mt-12 pt-8 border-t-2 border-dashed border-slate-400">
-                         <AnswerKey problems={pageProblems} startNumber={startNum + pageStart} />
+                         <AnswerKey 
+                           problems={pageProblems} 
+                           startNumber={startNum + pageStart} 
+                           fontSizeClass={FONT_SIZES[fontSizeIndex].answer}
+                         />
                       </div>
                     )}
                   </div>
@@ -210,11 +247,19 @@ export default function App() {
                  </p>
                </div>
                
-               <Worksheet problems={currentPageProblems} startNumber={startNum + (currentPage - 1) * PROBLEMS_PER_PAGE} />
+               <Worksheet 
+                 problems={currentPageProblems} 
+                 startNumber={startNum + (currentPage - 1) * PROBLEMS_PER_PAGE} 
+                 fontSizeClass={FONT_SIZES[fontSizeIndex].problem}
+               />
                
                {showAnswers && (
                  <div className="mt-4 animate-fade-in">
-                   <AnswerKey problems={currentPageProblems} startNumber={startNum + (currentPage - 1) * PROBLEMS_PER_PAGE} />
+                   <AnswerKey 
+                     problems={currentPageProblems} 
+                     startNumber={startNum + (currentPage - 1) * PROBLEMS_PER_PAGE} 
+                     fontSizeClass={FONT_SIZES[fontSizeIndex].answer}
+                   />
                  </div>
                )}
 
