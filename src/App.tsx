@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Problem, ProblemType, problemGenerators } from './lib/math';
 import { Worksheet } from './components/Worksheet';
 import { AnswerKey } from './components/AnswerKey';
-import { Printer, RefreshCcw, Eye, EyeOff, Settings, Minus, Plus, Loader2 } from 'lucide-react';
+import { Printer, RefreshCcw, Settings, Minus, Plus, Loader2 } from 'lucide-react';
 
 const PROBLEMS_PER_PAGE = 6;
 
@@ -24,7 +24,6 @@ export default function App() {
   const [startNum, setStartNum] = useState<number>(1);
   const [endNum, setEndNum] = useState<number>(12);
   const [showSettings, setShowSettings] = useState(true);
-  const [showAnswers, setShowAnswers] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [fontSizeIndex, setFontSizeIndex] = useState(1);
   
@@ -89,7 +88,6 @@ export default function App() {
     
     setProblems(newProblems);
     setCurrentPage(1);
-    setShowAnswers(false);
     setShowSettings(false);
     setIsGenerating(false);
   };
@@ -235,18 +233,6 @@ export default function App() {
               </div>
 
               <button 
-                onClick={() => setShowAnswers(!showAnswers)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all shadow-md ${
-                  showAnswers 
-                    ? 'bg-success-100 text-success-700 hover:bg-success-200' 
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                {showAnswers ? <EyeOff size={20} /> : <Eye size={20} />}
-                {showAnswers ? '정답 숨기기' : '정답 보기'}
-              </button>
-              
-              <button 
                 onClick={handlePrint}
                 className="flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-md"
               >
@@ -280,41 +266,47 @@ export default function App() {
                         fontSizeClass={FONT_SIZES[fontSizeIndex].problem}
                       />
                     </div>
-
-                    {showAnswers && (
-                      <div className="shrink-0 mt-6 pt-4 border-t-2 border-dashed border-slate-400">
-                         <AnswerKey 
-                           problems={pageProblems} 
-                           startNumber={startNum + pageStart} 
-                           fontSizeClass={FONT_SIZES[fontSizeIndex].answer}
-                         />
-                      </div>
-                    )}
                   </div>
                 );
               })}
+              
+              {/* Answer Key Print Page */}
+              <div className="flex flex-col pt-8 pb-8 px-8 box-border h-auto">
+                 <div className="text-center mb-6 border-b-2 border-slate-800 pb-4 shrink-0">
+                   <h2 className="text-3xl font-heading font-bold text-slate-800">일차방정식 정답지</h2>
+                 </div>
+                 <div className="flex-grow min-h-0">
+                   <AnswerKey 
+                     problems={problems} 
+                     startNumber={startNum} 
+                     fontSizeClass={FONT_SIZES[fontSizeIndex].answer}
+                   />
+                 </div>
+              </div>
             </div>
 
             {/* Interactive Screen Output */}
             <div className="print:hidden space-y-8">
                <div className="text-center">
-                 <h2 className="text-3xl font-heading font-bold text-brand-600 mb-2">풀어보자! 아자아자! 🚀</h2>
+                 <h2 className="text-3xl font-heading font-bold text-brand-600 mb-2">
+                   {currentPage <= totalPages ? '풀어보자! 아자아자! 🚀' : '✨ 정답 확인 ✨'}
+                 </h2>
                  <p className="text-slate-500 font-bold mb-6">
-                   {currentPage}쪽 (전체 {totalPages}쪽)
+                   {currentPage}쪽 (전체 {totalPages + 1}쪽)
                  </p>
                </div>
                
-               <Worksheet 
-                 problems={currentPageProblems} 
-                 startNumber={startNum + (currentPage - 1) * PROBLEMS_PER_PAGE} 
-                 fontSizeClass={FONT_SIZES[fontSizeIndex].problem}
-               />
-               
-               {showAnswers && (
-                 <div className="mt-4 animate-fade-in">
+               {currentPage <= totalPages ? (
+                 <Worksheet 
+                   problems={currentPageProblems} 
+                   startNumber={startNum + (currentPage - 1) * PROBLEMS_PER_PAGE} 
+                   fontSizeClass={FONT_SIZES[fontSizeIndex].problem}
+                 />
+               ) : (
+                 <div className="animate-fade-in">
                    <AnswerKey 
-                     problems={currentPageProblems} 
-                     startNumber={startNum + (currentPage - 1) * PROBLEMS_PER_PAGE} 
+                     problems={problems} 
+                     startNumber={startNum} 
                      fontSizeClass={FONT_SIZES[fontSizeIndex].answer}
                    />
                  </div>
@@ -329,11 +321,11 @@ export default function App() {
                    &lt; 이전
                  </button>
                  <span className="font-heading text-lg font-bold text-brand-600">
-                   {currentPage} / {totalPages}
+                   {currentPage} / {totalPages + 1}
                  </span>
                  <button 
-                   disabled={currentPage === totalPages}
-                   onClick={() => setCurrentPage(c => Math.min(totalPages, c + 1))}
+                   disabled={currentPage === totalPages + 1}
+                   onClick={() => setCurrentPage(c => Math.min(totalPages + 1, c + 1))}
                    className="px-6 py-3 rounded-full font-bold bg-slate-100 hover:bg-slate-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-slate-700"
                  >
                    다음 &gt;
