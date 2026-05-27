@@ -15,7 +15,7 @@ export function Worksheet({ problems, startNumber, fontSizeClass = 'text-2xl' }:
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 grid-rows-6 sm:grid-rows-3 print:grid-rows-3 gap-6 print:gap-4 w-full h-auto sm:h-[800px] print:h-full max-w-4xl mx-auto">
+    <div className="grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 grid-rows-6 sm:grid-rows-[repeat(3,minmax(0,1fr))] print:grid-rows-[repeat(3,minmax(0,1fr))] gap-6 print:gap-4 w-full h-full sm:min-h-[700px] max-w-4xl mx-auto flex-grow">
       {paddedProblems.map((prob, index) => (
         prob ? (
           <MathProblem 

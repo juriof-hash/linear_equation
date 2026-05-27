@@ -249,7 +249,7 @@ export default function App() {
                 const pageProblems = problems.slice(pageStart, pageStart + PROBLEMS_PER_PAGE);
                 
                 return (
-                  <div key={`print-page-${pageNum}`} className={`print-page-break h-screen print:h-[240mm] flex flex-col pt-8 pb-8 px-8 box-border`}>
+                  <div key={`print-page-${pageNum}`} className={`print-page-break print:h-[285mm] flex flex-col pt-8 pb-8 px-8 box-border`}>
                     <div className="text-center mb-6 border-b-2 border-slate-800 pb-4 shrink-0">
                       <h2 className="text-3xl font-heading font-bold text-slate-800">일차방정식 연습장</h2>
                       <div className="flex justify-between mt-4 font-bold text-lg text-slate-600">
