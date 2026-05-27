@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://lineare-quation-practice.vercel.app/sitemap.xml
