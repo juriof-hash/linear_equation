@@ -8,15 +8,27 @@ interface WorksheetProps {
 }
 
 export function Worksheet({ problems, startNumber, fontSizeClass = 'text-2xl' }: WorksheetProps) {
+  // Pad the problems array to always have 6 items to ensure uniform 6-grid layout
+  const paddedProblems = [...problems];
+  while (paddedProblems.length < 6) {
+    paddedProblems.push(null as any);
+  }
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 sm:grid-rows-3 print:grid-rows-3 gap-6 print:gap-4 w-full h-auto sm:h-[800px] print:h-full max-w-4xl mx-auto">
-      {problems.map((prob, index) => (
-        <MathProblem 
-          key={index} 
-          number={startNumber + index} 
-          equation={prob.equation} 
-          fontSizeClass={fontSizeClass}
-        />
+    <div className="grid grid-cols-1 sm:grid-cols-2 print:grid-cols-2 grid-rows-6 sm:grid-rows-3 print:grid-rows-3 gap-6 print:gap-4 w-full h-auto sm:h-[800px] print:h-full max-w-4xl mx-auto">
+      {paddedProblems.map((prob, index) => (
+        prob ? (
+          <MathProblem 
+            key={index} 
+            number={startNumber + index} 
+            equation={prob.equation} 
+            fontSizeClass={fontSizeClass}
+          />
+        ) : (
+          <div key={`empty-${index}`} className="hidden sm:flex print:flex flex-col p-5 bg-transparent rounded-xl border-2 border-transparent transition-all h-full min-h-[200px]">
+             {/* Empty placeholder to strictly enforce the 6-grid layout on desktop and print */}
+          </div>
+        )
       ))}
     </div>
   );
